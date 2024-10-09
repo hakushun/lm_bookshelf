@@ -12,18 +12,41 @@ type Book = {
 
 export function BookList({ searchTerm }: { searchTerm: string }) {
   const [books, setBooks] = useState<Book[]>([]);
+  const [loading, setLoading] = useState(true); // Loading state
+  const [error, setError] = useState<string | null>(null); // Error state
 
   useEffect(() => {
-    // TODO: Fetch books from API
-    const dummyBooks: Book[] = [
-      { id: "1", title: "1984", author: "George Orwell" },
-      { id: "2", title: "風の歌を聴け", author: "村上春樹" },
-      { id: "3", title: "ハリーポッターと賢者の石", author: "J.K. Rowling" },
-    ];
-    setBooks(dummyBooks);
+    const fetchBooks = async () => {
+      try {
+        const response = await fetch("/api/books"); // Fetch from the API
+        if (!response.ok) {
+          throw new Error("Network response was not ok");
+        }
+        const data: Book[] = await response.json();
+        setBooks(data);
+      } catch (error: unknown) {
+        if (error instanceof Error) {
+          setError(error.message); // Set error message
+        } else {
+          setError("An unknown error occurred"); // Set error message for unknown error
+        }
+      } finally {
+        setLoading(false); // Set loading to false after fetching
+      }
+    };
+
+    fetchBooks();
   }, []);
 
   const filteredBooks = books.filter((book) => book.title.includes(searchTerm) || book.author.includes(searchTerm));
+
+  if (loading) {
+    return <div>Loading...</div>; // Loading state
+  }
+
+  if (error) {
+    return <div>Error: {error}</div>; // Error state
+  }
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
