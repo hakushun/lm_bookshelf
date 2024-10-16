@@ -1,13 +1,18 @@
 import { NextResponse } from "next/server";
-
-// サンプルの本データ
-const books = [
-  { id: "1", title: "1984", author: "George Orwell" },
-  { id: "2", title: "風の歌を聴け", author: "村上春樹" },
-  { id: "3", title: "ハリーポッターと賢者の石", author: "J.K. Rowling" },
-];
+import { createClient } from "@supabase/supabase-js";
+import { supabase } from "@/lib/supabaseClient";
 
 // 全ての本を取得するAPIエンドポイント
 export async function GET() {
-  return NextResponse.json(books);
+  try {
+    const { data: books, error } = await supabase.from("books").select("*");
+
+    if (error) {
+      throw error; // Throw error if there is an issue
+    }
+
+    return NextResponse.json(books); // Return the fetched data
+  } catch (error: any) {
+    return NextResponse.json({ message: error.message }, { status: 500 }); // Handle errors
+  }
 }

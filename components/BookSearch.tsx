@@ -9,7 +9,6 @@ export function BookSearch({ setSearchTerm }: { setSearchTerm: (term: string) =>
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Searching for:", searchTerm);
     setSearchTerm(searchTerm); // Update the search term in the parent component
   };
 
