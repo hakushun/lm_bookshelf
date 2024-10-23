@@ -27,3 +27,33 @@ export async function GET(request: Request, { params }: { params: { id: string }
     return NextResponse.json({ message: error.message }, { status: 500 }); // エラーメッセージを返す
   }
 }
+
+export async function PUT(request: Request, { params }: { params: { id: string } }) {
+  const { id } = params;
+
+  try {
+    const { title, author, description, published_at } = await request.json();
+
+    // 入力のバリデーション
+    if (!title || !author || !description || !published_at) {
+      return NextResponse.json({ message: "Title, author, description, and published_at are required." }, { status: 400 });
+    }
+
+    // Supabaseで特定の本を更新
+    const { data, error } = await supabase
+      .from("books")
+      .update({ title, author, description, published_at })
+      .eq("id", id)
+      .single(); // 更新後の単一のレコードを取得
+
+    if (error) {
+      console.error("Supabase error:", error);
+      throw error;
+    }
+
+    return NextResponse.json(data, { status: 200 }); // 更新されたデータを返す
+  } catch (error: any) {
+    console.error("Error updating book:", error);
+    return NextResponse.json({ message: error.message }, { status: 500 }); // エラーメッセージを返す
+  }
+}

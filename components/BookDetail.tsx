@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 
 type Book = {
   id: string;
@@ -40,7 +41,7 @@ export function BookDetail({ id }: { id: string }) {
   }
 
   if (error) {
-    return <div>Error: {error}</div>;
+    return <div className="text-red-500">Error: {error}</div>;
   }
 
   if (!book) {
@@ -53,6 +54,9 @@ export function BookDetail({ id }: { id: string }) {
       <p className="text-gray-700">著者: {book.author}</p>
       <p className="mt-4">{book.description}</p>
       <p className="mt-2 text-sm text-gray-500">出版日: {book.published_at}</p>
+      <Link href={`/books/${id}/edit`} className="mt-4 inline-block text-blue-500 hover:underline">
+        編集する
+      </Link>
     </div>
   );
 }
