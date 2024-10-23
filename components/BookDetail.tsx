@@ -1,45 +1,58 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { useState, useEffect } from "react";
 
 type Book = {
   id: string;
   title: string;
   author: string;
   description: string;
-  publishedYear: number;
+  published_at: string;
 };
 
 export function BookDetail({ id }: { id: string }) {
   const [book, setBook] = useState<Book | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // TODO: Fetch book details from API
-    const dummyBook: Book = {
-      id,
-      title: '1984',
-      author: 'George Orwell',
-      description: 'A dystopian novel set in a totalitarian society.',
-      publishedYear: 1949,
+    const fetchBook = async () => {
+      try {
+        const response = await fetch(`/api/books/${id}`);
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.message || "Failed to fetch book");
+        }
+        const data: Book = await response.json();
+        setBook(data);
+      } catch (err: any) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
     };
-    setBook(dummyBook);
+
+    fetchBook();
   }, [id]);
 
-  if (!book) {
+  if (loading) {
     return <div>Loading...</div>;
   }
 
+  if (error) {
+    return <div>Error: {error}</div>;
+  }
+
+  if (!book) {
+    return <div>No book found.</div>;
+  }
+
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>{book.title}</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <p className="text-lg mb-2">著者: {book.author}</p>
-        <p className="text-lg mb-2">出版年: {book.publishedYear}</p>
-        <p className="text-gray-600">{book.description}</p>
-      </CardContent>
-    </Card>
+    <div>
+      <h2 className="text-2xl font-bold">{book.title}</h2>
+      <p className="text-gray-700">著者: {book.author}</p>
+      <p className="mt-4">{book.description}</p>
+      <p className="mt-2 text-sm text-gray-500">出版日: {book.published_at}</p>
+    </div>
   );
 }

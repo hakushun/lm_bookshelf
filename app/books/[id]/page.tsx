@@ -1,6 +1,7 @@
 import { BookDetail } from "@/components/BookDetail";
+import { supabase } from "@/lib/supabaseClient";
 
-// Main component for the book detail page
+// メインコンポーネント
 export default function BookDetailPage({ params }: { params: { id: string } }) {
   return (
     <div className="container mx-auto px-4 py-8">
@@ -10,22 +11,21 @@ export default function BookDetailPage({ params }: { params: { id: string } }) {
   );
 }
 
-// Function to generate static parameters for the dynamic route
+// 動的ルートの静的パラメータを生成
 export async function generateStaticParams() {
-  // Fetch the list of books or define the IDs you want to pre-render
-  const books = await fetchBooks(); // Replace with your actual data fetching logic
-  return books.map((book) => ({
-    id: book.id,
-  }));
-}
+  try {
+    const { data: books, error } = await supabase.from("books").select("id");
 
-// Example function to fetch books (replace with your actual implementation)
-async function fetchBooks() {
-  // This is a placeholder. Replace it with your actual API call or data fetching logic.
-  return [
-    { id: "1" },
-    { id: "2" },
-    { id: "3" },
-    // Add more book IDs as needed
-  ];
+    if (error) {
+      console.error("Error fetching book IDs:", error);
+      return [];
+    }
+
+    return books.map((book: { id: string | number }) => ({
+      id: String(book.id), // 数値を文字列に変換
+    }));
+  } catch (error) {
+    console.error("Error in generateStaticParams:", error);
+    return [];
+  }
 }
