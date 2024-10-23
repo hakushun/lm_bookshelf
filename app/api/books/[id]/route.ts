@@ -57,3 +57,26 @@ export async function PUT(request: Request, { params }: { params: { id: string }
     return NextResponse.json({ message: error.message }, { status: 500 }); // エラーメッセージを返す
   }
 }
+
+export async function DELETE(request: Request, { params }: { params: { id: string } }) {
+  const { id } = params;
+
+  try {
+    // Supabaseで特定の本を削除
+    const { data, error } = await supabase.from("books").delete().eq("id", id).single(); // 削除後の単一のレコードを取得
+
+    if (error) {
+      console.error("Supabase error:", error);
+      if (error.code === "PGRST116") {
+        // レコードが見つからない場合のエラーコード
+        return NextResponse.json({ message: "Book not found" }, { status: 404 });
+      }
+      throw error; // その他のエラーは投げる
+    }
+
+    return NextResponse.json({ message: "Book deleted successfully." }, { status: 200 }); // 削除成功のメッセージを返す
+  } catch (error: any) {
+    console.error("Error deleting book:", error);
+    return NextResponse.json({ message: error.message }, { status: 500 }); // エラーメッセージを返す
+  }
+}
